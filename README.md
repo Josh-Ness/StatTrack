@@ -22,7 +22,8 @@ The project interacts with two primary data sources, which are each outlined bel
 ### Data Source Two: The Odds API
 
 #### Data Source Information
-- **Accessibility**: This data source is an API that has both free and paid plans. The API documentation can be found [here](https://the-odds-api.com/sports-odds-data/nfl-odds.html). - **Functionallity**: The project uses the most affordable paid plan, due to how many requests are required. API requests can be made once you register an account to obtain a key.
+- **Accessibility**: This data source is an API that has both free and paid plans. The API documentation can be found [here](https://the-odds-api.com/sports-odds-data/nfl-odds.html)
+- **Functionallity**: The project uses the most affordable paid plan, due to how many requests are required. API requests can be made once you register an account to obtain a key.
 - **Relative Data**: The main endpoint is the player props endpoint. This endpoint is new and is still being actively improved. It's certainly not in a bad state, but over time changes are expected that will in turn enhance the project.
 
 #### Data Source Ingestion
