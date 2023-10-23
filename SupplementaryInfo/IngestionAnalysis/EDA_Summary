@@ -1,0 +1,18 @@
+Please see my Jupyter notebook in src/ingestion as it contains a summary of my EDA at the bottom of the notebook. If it is essential to have it here also, I have copied the summary from the notebook below.
+Summary
+nfl-data-py
+The nfl-data-py data source is for the most part very, ideal. The quantity of information is not too much, although once we want to use many years of data, the weekly player stats will grow in size fairly drastically. The other files should remain very manageable, due to their natural overwrite / update system enforced by the data source.
+
+This format of this source looks nice, with variables being of very reasonable types (numeric when possible). All the data ties together well, and I'm looking forward to building up my project with this source.
+
+Odds API
+This data source is still relatively new, and actively being improved. Until then, their are some aspects that seem less than ideal, such as no player_id or position being returned by the API. This makes it seem nearly impossible to identify a unique player if they share a name with someone else. They have plans to fix this in the near future, but the ETA is unspecified. I hope to see them also decrease the number of requests needed to get all the props, because right now it requires a lot of them to get all the different types of bets, and I'm having to pay for the cheapest version of the API, versus taking advantage of the free version.
+
+The size of this data source will grow very large, and I will need to determine the best way to injest and store it all.
+
+Challenges
+The main challenges I see are:
+
+trying to uniquely identify players from the Odds API and tie it together with the rest of the data from the other data source.
+Storing the large amount of data from the Odds API.
+Making sure all the tables from nfl-data-py are efficiently tied together.
