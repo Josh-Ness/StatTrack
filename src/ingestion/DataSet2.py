@@ -18,6 +18,8 @@ from azure.core.exceptions import AzureError
 import sys
 import logging
 
+import nfl_data_py as nfl #This is soley needed to make a player ID. See 'create_odds_id' method
+
 logging.basicConfig(filename='nfl.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 logging.getLogger('azure.core.pipeline.policies.http_logging_policy').setLevel(logging.WARNING) #This prevents noisy audit style logs. I only want any errors here
 logger = logging.getLogger('odds-api')
@@ -165,7 +167,7 @@ def process_row(row):
                 })                
     return results
 
-def get_current_props(api_key, prop_markets):
+def get_current_props(api_key, prop_markets, current_season):
     '''
     Parameters
     ----------
@@ -212,6 +214,7 @@ def get_current_props(api_key, prop_markets):
     flattened_betting_data = pd.DataFrame(flattened_betting_data)
 
     flattened_betting_data.drop_duplicates(inplace=True)
+    flattened_betting_data = create_odds_id(flattened_betting_data, current_season)
     return flattened_betting_data
 
 
@@ -253,6 +256,68 @@ def upload_file(df, season):
         logger.error(f'Azure specific error occurred: {str(ae)}')
     return
 
+def create_odds_id(odds_df, season):
+    odds_df['Commence Date'] = pd.to_datetime(odds_df['Commence Time']).dt.date
+    # Importing the schedule and preparing it for merging
+    schedule_df = nfl.import_schedules([season])
+    schedule_df['gameday'] = pd.to_datetime(schedule_df['gameday']).dt.date
+    schedule_df.drop_duplicates(subset=['gameday'], inplace=True)
+
+    # Merging with schedule dataframe
+    odds_df = pd.merge(odds_df, schedule_df[['gameday', 'week']], left_on='Commence Date', right_on='gameday', how='left')
+    odds_df.drop(['gameday'], axis=1, inplace=True)
+    
+    # Replacing team names with abbreviations using a dictionary
+    team_abbreviations = get_team_abbreviations()
+    odds_df.replace({'Home Team': team_abbreviations, 'Away Team': team_abbreviations}, inplace=True)
+
+    # Creating player IDs in a vectorized way
+    season_str = str(season)
+    odds_df['player_id'] = (
+        season_str + '_' +
+        odds_df['week'].astype(str) + '_' +
+        odds_df['Away Team'] + '_' +
+        odds_df['Home Team'] + '_' +
+        odds_df['Player Name'].str.replace(r"[ \-\.]", "", regex=True)).str.lower()
+    odds_df.drop(['Commence Date'], axis=1, inplace=True)
+    return odds_df
+    
+def get_team_abbreviations():
+    team_abbreviations = {
+    "Arizona Cardinals": "ARI",
+    "Atlanta Falcons": "ATL",
+    "Baltimore Ravens": "BAL",
+    "Buffalo Bills": "BUF",
+    "Carolina Panthers": "CAR",
+    "Chicago Bears": "CHI",
+    "Cincinnati Bengals": "CIN",
+    "Cleveland Browns": "CLE",
+    "Dallas Cowboys": "DAL",
+    "Denver Broncos": "DEN",
+    "Detroit Lions": "DET",
+    "Green Bay Packers": "GB",
+    "Houston Texans": "HOU",
+    "Indianapolis Colts": "IND",
+    "Jacksonville Jaguars": "JAX",
+    "Kansas City Chiefs": "KC",
+    "Los Angeles Chargers": "LAC",
+    "Miami Dolphins": "MIA",
+    "Minnesota Vikings": "MIN",
+    "New England Patriots": "NE",
+    "New Orleans Saints": "NO",
+    "New York Giants": "NYG",
+    "New York Jets": "NYJ",
+    "Oakland Raiders": "OAK",
+    "Philadelphia Eagles": "PHI",
+    "Pittsburgh Steelers": "PIT",
+    "Seattle Seahawks": "SEA",
+    "San Francisco 49ers": "SF",
+    "Saint Louis Rams": "STL",
+    "Tampa Bay Buccaneers": "TB",
+    "Tennessee Titans": "TEN",
+    "Washington Commanders": "WAS"
+    }
+    return team_abbreviations    
 
 def main():
     current_season = get_season()
@@ -261,13 +326,15 @@ def main():
         logger.error('Application stopped: ODDS_API_KEY environment variable is not set.')
         sys.exit('Error: The ODDS_API_KEY environment variable is not set.')
 
-    prop_markets = ['player_pass_tds', 'player_pass_yds', 'player_pass_completions', 'player_pass_attempts', 'player_pass_interceptions', 'player_pass_longest_completion', 'player_rush_yds', 'player_rush_attempts',
-                    'player_rush_longest', 'player_receptions', 'player_reception_yds', 'player_reception_longest', 'player_kicking_points', 'player_field_goals', 'player_tackles_assists', 'player_1st_td', 'player_last_td', 'player_anytime_td']
+    #prop_markets = ['player_pass_tds', 'player_pass_yds', 'player_pass_completions', 'player_pass_attempts', 'player_pass_interceptions', 'player_pass_longest_completion', 'player_rush_yds', 'player_rush_attempts',
+     #               'player_rush_longest', 'player_receptions', 'player_reception_yds', 'player_reception_longest', 'player_kicking_points', 'player_field_goals', 'player_tackles_assists', 'player_1st_td', 'player_last_td', 'player_anytime_td']
     
-    df = get_current_props(api_key, prop_markets)
+    prop_markets = ['player_pass_tds', 'player_pass_yds', 'player_pass_completions', 'player_pass_interceptions', 'player_rush_yds', 
+                    'player_receptions', 'player_reception_yds', 'player_kicking_points', 'player_field_goals', 'player_anytime_td']
+    
+    df = get_current_props(api_key, prop_markets, current_season)
     upload_file(df, current_season)
     logger.info('All odds-api data ingested and uploaded successfully')
-    return
 
 if __name__ == '__main__':
     main()

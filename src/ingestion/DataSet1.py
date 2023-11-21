@@ -13,6 +13,7 @@ use a single weeks data for my business goal anyways. Therefore, I will upload t
 import nfl_data_py as nfl
 import pandas as pd
 import sys
+import re
 from azure.storage.blob import BlobServiceClient
 from io import BytesIO
 from datetime import datetime
@@ -47,6 +48,36 @@ def retrieve_player_stats(season_list):
     except Exception as e:
         logger.error(f'Error retrieving player stats: {str(e)}')        
     return df
+
+def retrieve_pbp_stats(season_list, week=-1):
+    '''
+    Takes in a list of season years, and returns a dataframe containing every single play from the season. From this, data will be able to be aggregated
+    to get player stats
+    '''
+    try:
+        full_pbp = nfl.import_pbp_data(season_list)
+        if week == -1:
+            week = full_pbp['week'].max()
+        pbp = full_pbp.loc[full_pbp['week'] == week]
+        fact_cols = ['game_id', 'play_id', 'qtr', 'complete_pass', 'incomplete_pass', 'passing_yards', 'pass_touchdown', 'interception',
+                             'air_yards','sack', 'yards_after_catch', 'first_down_pass', 'rush_attempt', 'rushing_yards', 'rush_touchdown',
+                             'first_down_rush', 'field_goal_attempt', 'extra_point_attempt', 'field_goal_result', 'extra_point_result', 'receiver_player_id',
+                             'rusher_player_id', 'passer_player_id', 'kicker_player_id', 'stadium_id', 'week']
+                                         
+        df = pbp[fact_cols].copy()
+        
+        roster = nfl.import_seasonal_rosters(season_list)
+        df = create_odds_ids(df, ['receiver_player_id', 'rusher_player_id', 'passer_player_id', 'kicker_player_id'], roster)
+        
+        #Return week as a formatted string
+        if week<10:
+            week = '0'+str(week)
+        else:
+            week = str(week)
+        
+    except Exception as e:
+        logger.error(f'Error retrieving player stats: {str(e)}')        
+    return df, str(week)
 
 def retrieve_player_injuries(season_list):
     '''
@@ -89,10 +120,40 @@ def retrieve_stadiums(season_list):
     df = nfl.import_schedules(season_list)
     stadiums = df[['stadium_id', 'stadium', 'roof', 'surface']].copy()
     stadiums.drop_duplicates(inplace=True)
+    stadiums.dropna(inplace=True)
     return stadiums
 
+def create_odds_ids(df, columns, roster):
+    '''
+    Takes a list of player_name columns and converts it to a custom ID corresponding to a custom ID in The Odds data source
+    '''
+    
+    ### Create full name column
+    new_cols = []
+    for col in columns:
+        # Perform the merge
+        merged = pd.merge(df[[col]], roster[['player_id', 'player_name']], 
+                          left_on=col, right_on='player_id', how='left')   
+        # Add the new column to df
+        column_name = col.replace('id', 'odds_id')
+        new_cols.append(column_name)
+        df[column_name] = merged['player_name']
+        
+    for col in new_cols:
+        if col in df.columns:
+            df[col] = df.game_id + '_' + df[col]
+    # Regular expression for removing spaces, periods, hyphens, and other special characters
+    regex_pattern = '[\s\.\-]+'
 
-def upload_file(df, table_type, season): 
+    # Iterate over each specified column and apply the cleaning
+    for col in new_cols:
+        if col in df.columns:
+            # Apply transformations only on non-NaN rows
+            df[col] = df[col].apply(
+                lambda x: re.sub(regex_pattern, '', x.lower()) if pd.notna(x) else x)
+    return df
+
+def upload_file(df, table_type, season, week=None): 
     '''
     Uplaods a dataframe as a CSV to azure, path determined by parameters
     
@@ -111,14 +172,16 @@ def upload_file(df, table_type, season):
             logger.error('Application stopped: NFL_STORAGE environment variable is not set.')
             sys.exit('Error: The NFL_STORAGE environment variable is not set.')
         container_name = 'nfl-data-py'
-        
+
         table_mapping = {
-        'player-stats': f'weekly-player-stats/{season}_player_stats.csv',
-        'player-injuries': f'weekly-player-injuries/{season}_player_injuries.csv',
-        'schedules': f'schedules/{season}_schedule.csv',
-        'rosters': f'rosters/{season}_roster.csv'
+        'player-stats': f'weekly-player-stats/{season}_player_stats.parquet',
+        'pbp-stats': f'pbp-stats/{season}/week{week}_pbp_stats.parquet',
+        'player-injuries': f'weekly-player-injuries/{season}_player_injuries.parquet',
+        'schedules': f'schedules/{season}_schedule.parquet',
+        'rosters': f'rosters/{season}_roster.parquet',
+        'stadiums':f'stadiums/{season}_stadiums.parquet'
         }
-            
+        
         blob_name = table_mapping.get(table_type)
         if blob_name is None:
             logger.error(f'Invalid table type provided: {table_type}')
@@ -126,7 +189,7 @@ def upload_file(df, table_type, season):
         # Create a buffer
         with BytesIO() as buffer:
             # Save the DataFrame to the buffer in CSV format
-            df.to_csv(buffer, encoding='utf-8', index=False)
+            df.to_parquet(buffer, index=False)
             
             # Rewind the buffer's position to the start
             buffer.seek(0)
@@ -145,13 +208,14 @@ def upload_file(df, table_type, season):
 def main():
     current_season = get_season()
     upload_file(retrieve_player_stats([current_season]), 'player-stats', current_season)
+    pbp_data, pbp_week = retrieve_pbp_stats([current_season])
+    upload_file(pbp_data, 'pbp-stats', current_season, pbp_week)
     upload_file(retrieve_player_injuries([current_season]), 'player-injuries', current_season)
     upload_file(retrieve_schedule([current_season]), 'schedules', current_season)
     upload_file(retrieve_rosters([current_season]), 'rosters', current_season)
+    upload_file(retrieve_stadiums([current_season]), 'stadiums', current_season)
     logger.info('All nfl-data-py data ingested and uploaded successfully')
     return
 
 if __name__ == '__main__':
     main()
-
-
