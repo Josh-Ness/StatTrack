@@ -8,7 +8,6 @@ Created on Sun Oct  1 23:11:14 2023
 
 import requests
 import pandas as pd
-import nfl_data_py 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from azure.storage.blob import BlobServiceClient
@@ -17,7 +16,7 @@ from io import BytesIO #Allows us to operate in memory and send a CSV to Azure w
 from azure.core.exceptions import AzureError
 import sys
 import logging
-
+import re
 import nfl_data_py as nfl #This is soley needed to make a player ID. See 'create_odds_id' method
 
 logging.basicConfig(filename='nfl.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -57,8 +56,8 @@ def get_upcoming_nfl_games(api_key): # 1 request
             df = pd.json_normalize(data)
             
             #convert commence time to datetime value in eastern time zone
-            df['commence_time'] = pd.to_datetime(df['commence_time'])
-            df['commence_time'] = df['commence_time'].dt.tz_convert('US/Eastern')
+           
+            df['commence_time'] = pd.to_datetime(df['commence_time']).dt.tz_convert('US/Eastern').dt.tz_localize(None)
             
             return df
         else:
@@ -104,8 +103,7 @@ def get_props_for_event(props, eventId, apiKey):
             
             # Converting the JSON data to a pandas DataFrame
             df = pd.json_normalize(data)
-            df['commence_time'] = pd.to_datetime(df['commence_time'])
-            df['commence_time'] = df['commence_time'].dt.tz_convert('US/Eastern')
+            df['commence_time'] = pd.to_datetime(df['commence_time']).dt.tz_convert('US/Eastern').dt.tz_localize(None)
             return df
         else:
             logger.error(f'Failed to retrieve props for event ID: {eventId}. Status code: {response.status_code}, Response: {response.text}')
@@ -186,6 +184,7 @@ def get_current_props(api_key, prop_markets, current_season):
     
     #I only want to include games in the next 5 days (including current day). If no props are available yet, doesnt cost a request. 
     today = pd.Timestamp.now(tz='US/Eastern').normalize()
+    
     end_date = today + pd.Timedelta(days=5)
     games_df = games_df[(games_df['commence_time'].dt.date >= today.date()) & (games_df['commence_time'].dt.date <= end_date.date())]                       
     game_ids = games_df['id'].unique().tolist()
@@ -199,7 +198,7 @@ def get_current_props(api_key, prop_markets, current_season):
         # Append the DataFrame to the list (if df is not None)
         if df is not None:
             #add refresh time
-            df['refresh_time'] = pd.Timestamp.now(tz='US/Eastern').isoformat()
+            df['refresh_time'] = pd.Timestamp.now(tz='US/Eastern').tz_localize(None)
             dfs.append(df)
     
     # Concatenate all DataFrames into one
@@ -214,8 +213,20 @@ def get_current_props(api_key, prop_markets, current_season):
     flattened_betting_data = pd.DataFrame(flattened_betting_data)
 
     flattened_betting_data.drop_duplicates(inplace=True)
-    flattened_betting_data = create_odds_id(flattened_betting_data, current_season)
-    return flattened_betting_data
+    #Add week information
+    df = add_week_information(flattened_betting_data, current_season)
+    #Abbreviate teams
+    df = abbr_teams(df)
+    #Create player IDs
+    df = create_player_id(df, current_season)
+    
+    # flattened_betting_data = create_odds_id(flattened_betting_data, current_season)
+    new_column_names = ['PlayerName', 'EventID', 'CommenceTime', 'AwayTeam', 'HomeTeam', 'BookmakerKey', 'BookmakerTitle',
+                        'MarketKey', 'OutcomeName', 'Price', 'Point', 'RefreshTime', 'Week', 'Season', 'PlayerID']
+
+    # Renaming the columns
+    df.columns = new_column_names
+    return df
 
 
 def upload_file(df, season):
@@ -234,14 +245,14 @@ def upload_file(df, season):
         if not connection_string:
             logger.error('Application stopped: NFL_STORAGE environment variable is not set.')
             sys.exit('Error: The NFL_STORAGE environment variable is not set.')
-        container_name = "odds-api"  # e.g., 'nfl-betting-data'
+        container_name = "odds-api"
         timestamp_str = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        blob_name = f'player-props/{season}/NFL_data_{timestamp_str}.csv'
+        blob_name = f'player-props/{season}/NFL_data_{timestamp_str}.parquet'
         
         # Create a buffer
         with BytesIO() as buffer:
-            # Save the DataFrame to the buffer in CSV format
-            df.to_csv(buffer, encoding='utf-8', index=False)
+            # Save the DataFrame to the buffer in parquet format
+            df.to_parquet(buffer, index=False)
             
             # Rewind the buffer's position to the start
             buffer.seek(0)
@@ -256,7 +267,7 @@ def upload_file(df, season):
         logger.error(f'Azure specific error occurred: {str(ae)}')
     return
 
-def create_odds_id(odds_df, season):
+def add_week_information(odds_df, season):
     odds_df['Commence Date'] = pd.to_datetime(odds_df['Commence Time']).dt.date
     # Importing the schedule and preparing it for merging
     schedule_df = nfl.import_schedules([season])
@@ -265,22 +276,27 @@ def create_odds_id(odds_df, season):
 
     # Merging with schedule dataframe
     odds_df = pd.merge(odds_df, schedule_df[['gameday', 'week']], left_on='Commence Date', right_on='gameday', how='left')
-    odds_df.drop(['gameday'], axis=1, inplace=True)
+    odds_df.drop(['gameday', 'Commence Date'], axis=1, inplace=True)
+    odds_df['season'] = season
+    return odds_df
     
+def abbr_teams(odds_df):
     # Replacing team names with abbreviations using a dictionary
     team_abbreviations = get_team_abbreviations()
     odds_df.replace({'Home Team': team_abbreviations, 'Away Team': team_abbreviations}, inplace=True)
-
-    # Creating player IDs in a vectorized way
-    season_str = str(season)
-    odds_df['player_id'] = (
-        season_str + '_' +
-        odds_df['week'].astype(str) + '_' +
-        odds_df['Away Team'] + '_' +
-        odds_df['Home Team'] + '_' +
-        odds_df['Player Name'].str.replace(r"[ \-\.]", "", regex=True)).str.lower()
-    odds_df.drop(['Commence Date'], axis=1, inplace=True)
     return odds_df
+
+def create_player_id(odds_df, season):
+    # Creating player IDs in a vectorized way
+    roster = nfl.import_seasonal_rosters([season])   
+    #Regular expression for removing spaces, periods, hyphens, and other special characters
+    regex_pattern = '[\s\.\-]+'
+    odds_df['merged_name'] = odds_df['Player Name'].str.replace('Jr.', '')
+    odds_df['merged_name'] = odds_df['merged_name'].apply(lambda x: re.sub(regex_pattern, '', x.lower()) if pd.notna(x) else x)
+    roster['merged_name'] = roster['player_name'].apply(lambda x: re.sub(regex_pattern, '', x.lower()) if pd.notna(x) else x)
+    merged_df = odds_df.merge(roster[['merged_name', 'player_id']], on='merged_name', how = 'left')
+    merged_df.drop(['merged_name'], axis=1, inplace=True)
+    return merged_df
     
 def get_team_abbreviations():
     team_abbreviations = {
@@ -300,7 +316,9 @@ def get_team_abbreviations():
     "Indianapolis Colts": "IND",
     "Jacksonville Jaguars": "JAX",
     "Kansas City Chiefs": "KC",
+    "Las Vegas Raiders":"LV",
     "Los Angeles Chargers": "LAC",
+    "Los Angeles Rams": "LAR",
     "Miami Dolphins": "MIA",
     "Minnesota Vikings": "MIN",
     "New England Patriots": "NE",
@@ -325,9 +343,6 @@ def main():
     if not api_key:
         logger.error('Application stopped: ODDS_API_KEY environment variable is not set.')
         sys.exit('Error: The ODDS_API_KEY environment variable is not set.')
-
-    #prop_markets = ['player_pass_tds', 'player_pass_yds', 'player_pass_completions', 'player_pass_attempts', 'player_pass_interceptions', 'player_pass_longest_completion', 'player_rush_yds', 'player_rush_attempts',
-     #               'player_rush_longest', 'player_receptions', 'player_reception_yds', 'player_reception_longest', 'player_kicking_points', 'player_field_goals', 'player_tackles_assists', 'player_1st_td', 'player_last_td', 'player_anytime_td']
     
     prop_markets = ['player_pass_tds', 'player_pass_yds', 'player_pass_completions', 'player_pass_interceptions', 'player_rush_yds', 
                     'player_receptions', 'player_reception_yds', 'player_kicking_points', 'player_field_goals', 'player_anytime_td']
