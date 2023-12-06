@@ -116,7 +116,11 @@ def OddsDataPyBlobTriggerFunction(myblob: func.InputStream):
         insert_query = insert_query_generator(target_table, df.columns)
         cursor.executemany(insert_query, tuples)
         conn.commit()
-
+        try:
+            cursor.execute('EXEC LoadStarSchema')
+            conn.commit()
+        except:
+            logging.warning('Procedure "LoadStarSchema" Failed, possibly due to foreign key restrain data not being populated yet. Ensure data is loaded, then call procedure.')
         cursor.close()
         conn.close()
 
