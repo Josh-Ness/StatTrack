@@ -68,6 +68,7 @@ def NFLDataPyBlobTriggerFunction(myblob: func.InputStream):
 
 
 # odds-api container
+
 @app.blob_trigger(arg_name="myblob", path="odds-api/{name}", connection="AzureWebJobsStorage") 
 def OddsDataPyBlobTriggerFunction(myblob: func.InputStream):
     logging.info(f"Python blob trigger function processed blob")

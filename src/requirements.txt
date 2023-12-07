@@ -4,3 +4,7 @@
 
 azure-functions
 pyodbc
+pandas
+requests
+pyarrow
+fastparquet
