@@ -3,7 +3,7 @@
 # StatTrack
 ### Data Driven Sports and Betting Decisions by Josh Ness
 
-![StatTrack Logo](/SupplementaryInfo.png)
+![StatTrack Logo](/SupplementaryInfo/StatTrack%20Logo.png)
 
 
 ## Overview and Business Goal
