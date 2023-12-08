@@ -14,7 +14,7 @@ def NFLDataPyBlobTriggerFunction(myblob: func.InputStream):
     logging.info(f"Name: {myblob.name}")
 
     # SAS Token
-    sas_token = os.environ["NFL-DATA"]
+    sas_token = os.environ["NFL_DATA"]
 
     # Construct the Blob URL with SAS Token
     storage_account_name = "nfl1"  
@@ -75,7 +75,7 @@ def OddsDataPyBlobTriggerFunction(myblob: func.InputStream):
     logging.info(f"Name: {myblob.name}")
 
     # SAS Token
-    sas_token = os.environ["NFL-DATA"]
+    sas_token = os.environ["NFL_DATA"]
 
     # Construct the Blob URL with SAS Token
     storage_account_name = "nfl1" 
