@@ -17,7 +17,7 @@ Currently, StatTrack is specific to the NFL. It utilizes two main data sources, 
 ### Data Source One: nfl-data-py
 
 #### Data Source Information
-- **Accessibility**: This data source is free for anyone to use, and can be found [Here](https://pypi.org/project/nfl-data-py/). This source is NFL specific.
+- **Accessibility**: This data source is free for anyone to use, and can be found [here](https://pypi.org/project/nfl-data-py/). This source is NFL specific.
 - **Functionality**: Using this datasource consists of installing the library, which can be used to call methods and retrieve data.
 - **Relative Data**: Various different tables of data can be retrieved, including play-by-play stats, roster, schedules and more. Play-By-Play stats will be the powerhouse of StatTrack.
 
@@ -53,12 +53,12 @@ Once all necessary wrangling is done, the data finally is inserted into the star
 StatTrack is currently using PowerBI that connects to the database. From here, users can interact with various powerful visualizations.
 - Users could see how many receptions a player had game, or see exactly how many yards each reception of theirs earned the team.
 - Users could find out how many rushing a receiving yards and player has on average at a specific stadium, against a specific opponent, in certain weather, and much more.
-- Users can track how a players betting lines compare to how they hve historically performed under certain conditions
+- Users can track how a players betting lines compare to how they hve historically performed under certain conditions.
 
 ## Future
 While StatTrack has its full data pipeline in place, there are plans to improve its serving powers. In the future, possibilities include:
 - **Application**: A mobile StatTrack application that will offer free and paid versions of the app. 
 - **Insights**: In the future, StatTrack hopes to use AI to geerate quick helpful insights. For example, providing an insight that 'Kirk Cousins has thrown for over 274.5 passing yards in 9 of his last 10 games where the Minnesota Vikings were underdogs on the road.
 
-## Responsability
+## Responsibility
 While data can help make informed decisions, sports betting is a form of gambling. Even with StatTrack, nothing is guarenteed to happen within sports, and all users must acknowledge the risk of betting participation.
