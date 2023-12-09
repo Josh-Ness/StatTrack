@@ -55,6 +55,14 @@ StatTrack is currently using PowerBI that connects to the database. From here, u
 - Users could find out how many rushing a receiving yards and player has on average at a specific stadium, against a specific opponent, in certain weather, and much more.
 - Users can track how a players betting lines compare to how they hve historically performed under certain conditions.
 
+For basic examples of how data can and will be used, view the file stored at /SupplementaryInfo.Visualization Artifacts.pptx.
+
+## Architecture Diagram
+The following represents a high level architecture diagram
+![High Level Architecture Diagram](/SupplementaryInfo/Architecture%20Diagram.png)
+
+For more information on the phases of the project, please view the 'Project Overview' pptx file located at /SupplementaryInfo/Project Overview.pptx.
+
 ## Future
 While StatTrack has its full data pipeline in place, there are plans to improve its serving powers. In the future, possibilities include:
 - **Application**: A mobile StatTrack application that will offer free and paid versions of the app. 

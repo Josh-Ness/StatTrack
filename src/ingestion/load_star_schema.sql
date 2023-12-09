@@ -1,3 +1,5 @@
+-- This script transforms data from the staging tables to the finalized star schema
+-- Should any error occer, the error information is sent to its own table
 ALTER PROCEDURE LoadStarSchema
 AS
 BEGIN
@@ -96,8 +98,8 @@ END CATCH
 BEGIN TRANSACTION;
 BEGIN TRY
 
-    INSERT INTO ss.Dim_PlayerProp (PlayerName, EventID, CommenceTime, AwayTeam, HomeTeam, BookmakerKey, BookmakerTitle, MarketKey, OutcomeName, Price, Point, RefreshTime)
-    SELECT DISTINCT PlayerName, EventID, CommenceTime, AwayTeam, HomeTeam, BookmakerKey, BookmakerTitle, MarketKey, OutcomeName, Price, Point, RefreshTime 
+    INSERT INTO ss.Dim_PlayerProp (PlayerName, EventID, CommenceTime, AwayTeam, HomeTeam, BookmakerKey, BookmakerTitle, MarketKey, OutcomeName, Price, Point, RefreshTime, Week, Season, PlayerID)
+    SELECT DISTINCT PlayerName, EventID, CommenceTime, AwayTeam, HomeTeam, BookmakerKey, BookmakerTitle, MarketKey, OutcomeName, Price, Point, RefreshTime, Week, Season, PlayerID
     FROM dbo.PlayerProp;
         COMMIT TRANSACTION;
         DELETE FROM dbo.PlayerProp;

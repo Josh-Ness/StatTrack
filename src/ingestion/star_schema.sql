@@ -1,3 +1,4 @@
+-- This script defines the finalized star schema, with appropriate data types and constraints
 -- Create a new schema for the star schema
 CREATE SCHEMA ss;
 GO
@@ -111,7 +112,10 @@ CREATE TABLE ss.Dim_PlayerProp (
     OutcomeName NVARCHAR(10),
     Price DECIMAL(7,3),
     Point DECIMAL(7,3),
-    RefreshTime DATETIME
+    RefreshTime DATETIME,
+    Week INT,
+    Season INT,
+    PlayerID NVARCHAR(20)
 );
 GO
 

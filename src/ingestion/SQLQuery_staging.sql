@@ -1,3 +1,4 @@
+-- This script defined a initial schema for the staging tables
 -- Player Table
 CREATE TABLE dbo.Player (
     PlayerID NVARCHAR(20),
