@@ -37,6 +37,8 @@ Each source used within StatTrack has its own ingestion script, but they follow 
 
 After data is loaded into a DataFrame, it is sent to a custom function that sends it as a parquet file to the desired location within Microsoft Azure Blob Storage. This function uses a buffer to send the file without ever having to use local storage. 
 
+Python scripts used for ingestion can be found at src/ingestion
+
 ## Transformation
 StatTrack uses Azure Functions to bridge ingestion and blob storage to the next step, transformation. Immedietly after new data is saved to the blob storage via the ingestion scripts, it is detected by BlobTrigger functions within an Azure Function App. These trigger functions load the parquet files into a DataFrame. Once loaded, a custom function is called that crafts a SQL BULKINSERT function based off of the DataFrame's column names, hence the reason for renaming them previously. The trigger function then connects to StatTrack's database and uses the crafted query to insert new data into the staging tables of the database. 
 
@@ -49,6 +51,7 @@ Most of the transformation occurs now that the data is in staging tables nad bei
 
 Once all necessary wrangling is done, the data finally is inserted into the star schema tables, as long as the primary keys don't already exist. If they do exist, it checks whether or not information has changed, meaning that there was a stat correction. If data has in fact changed, it updates the existing data with the new data. Once again, this whole process is automatic and will be done immedietly after ingestion. 
 
+SQL scripts used for tranformation can be found at /src/transformation.
 ## Serving
 StatTrack is currently using PowerBI that connects to the database. From here, users can interact with various powerful visualizations.
 - Users could see how many receptions a player had game, or see exactly how many yards each reception of theirs earned the team.
