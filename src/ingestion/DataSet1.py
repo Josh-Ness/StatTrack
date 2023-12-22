@@ -5,9 +5,8 @@ Created on Sat Sep 16 23:07:47 2023
 @author: joshua.s.ness@ndsu.edu
 
 This file provides methods and a main method to upload several data tables to Azure.
-It is important to note, obtaining the most recent data for new games requires obtaining the 
-data for the entire season. Hence, uploading just the new week would actually require more work, and I would never want to 
-use a single weeks data for my business goal anyways. Therefore, I will upload the updated season data, overwriting the previous blob.
+It is important to note, obtaining the most recent data for new games requires collection of
+data for the entire season.
 """
 
 import nfl_data_py as nfl
