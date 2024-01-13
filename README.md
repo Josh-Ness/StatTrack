@@ -69,6 +69,7 @@ For more information on the phases of the project, please view the 'Project Over
 ## Future
 While StatTrack has its full data pipeline in place, there are plans to improve its serving powers. In the future, possibilities include:
 - **Application**: A mobile StatTrack application that will offer free and paid versions of the app. 
+
 - **Insights**: In the future, StatTrack hopes to use AI to geerate quick helpful insights. For example, providing an insight that 'Kirk Cousins has thrown for over 274.5 passing yards in 9 of his last 10 games where the Minnesota Vikings were underdogs on the road.
 
 ## Responsibility
