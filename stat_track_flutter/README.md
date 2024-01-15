@@ -1,6 +1,6 @@
 # stat_track_flutter
 
-Flutter Project For StatTrack
+Flutter Project for StatTrack Application
 
 ## Getting Started
 
