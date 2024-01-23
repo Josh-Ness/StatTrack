@@ -56,4 +56,36 @@ class Player {
     this.gameType,
     this.startDate,
   });
+
+  factory Player.fromJson(Map<String, dynamic> json) {
+    return Player(
+      playerId: json['PlayerID'] as String,
+      firstName: json['FirstName'] as String,
+      lastName: json['LastName'] as String,
+      fullName: json['FullName'] as String,
+      jerseyNumber: json['JerseyNumber'] as int?,
+      status: json['Status'] as String?,
+      team: json['Team'] as String?,
+      position: json['Position'] as String?,
+      ngsPosition: json['NgsPosition'] as String?,
+      depthChartPosition: json['DepthChartPosition'] as String?,
+      age: json['Age'] as int?,
+      yearsExp: json['YearsExp'] as int?,
+      birthDate: json['BirthDate'] != null ? DateTime.parse(json['BirthDate'] as String) : null,
+      height: json['Height'] as int?,
+      weight: json['Weight'] as int?,
+      college: json['College'] as String?,
+      draftNumber: json['DraftNumber'] as int?,
+      draftClub: json['DraftClub'] as String?,
+      entryYear: json['EntryYear'] as int?,
+      rookieYear: json['RookieYear'] as int?,
+      headshotUrl: json['HeadshotUrl'] as String?,
+      footballName: json['FootballName'] as String?,
+      statusDescriptionAbbr: json['StatusDescriptionAbbr'] as String?,
+      season: json['Season'] as int?,
+      week: json['Week'] as int?,
+      gameType: json['GameType'] as String?,
+      startDate: json['StartDate'] != null ? DateTime.parse(json['StartDate'] as String) : null,
+    );
+  }
 }

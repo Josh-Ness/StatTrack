@@ -34,4 +34,26 @@ class Injury {
     this.practiceStatus,
     required this.dateModified,
   });
+
+  factory Injury.fromJson(Map<String, dynamic> json) {
+    return Injury(
+      season: json['Season'] as int,
+      week: json['Week'] as int,
+      gsisId: json['GsisID'] as String,
+      firstName: json['FirstName'] as String?,
+      lastName: json['LastName'] as String?,
+      fullName: json['FullName'] as String?,
+      gameType: json['GameType'] as String?,
+      team: json['Team'] as String,
+      position: json['Position'] as String,
+      reportPrimaryInjury: json['ReportPrimaryInjury'] as String?,
+      reportSecondaryInjury: json['ReportSecondaryInjury'] as String?,
+      reportStatus: json['ReportStatus'] as String?,
+      practicePrimaryInjury: json['PracticePrimaryInjury'] as String?,
+      practiceSecondaryInjury: json['PracticeSecondaryInjury'] as String?,
+      practiceStatus: json['PracticeStatus'] as String?,
+      dateModified: DateTime.parse(json['DateModified'] as String),
+    );
+  }
+
 }

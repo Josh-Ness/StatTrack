@@ -1,3 +1,7 @@
+/**
+
+ START PRE LOADED TEST APP
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -120,6 +124,28 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+END PRE LOADED TEST APP
+    */
+
+import 'package:flutter/material.dart';
+import 'screens/test_mock_service_screen.dart'; // Import the test screen
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      home: TestMockDataServiceScreen(), // Set the test screen as the home screen
     );
   }
 }

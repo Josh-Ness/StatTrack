@@ -76,4 +76,47 @@ class PlayByPlay {
     this.rusherPlayerId,
     this.kickerPlayerId,
   });
+
+  factory PlayByPlay.fromJson(Map<String, dynamic> json) {
+    return PlayByPlay(
+      gameId: json['GameID'] as String,
+      playId: json['PlayID'] as int,
+      qtr: json['QTR'] as int,
+      drive: json['Drive'] as int,
+      down: json['Down'] as int?,
+      shotgun: json['Shotgun'] == "1", //Loads in as string, convert to boolean
+      noHuddle: json['NoHuddle'] == "1",
+      qbDropback: json['QbDropback'] == "1",
+      qbScramble: json['QbScramble'] == "1",
+      completePass: json['CompletePass'] == "1",
+      incompletePass: json['IncompletePass'] == "1",
+      passingYards: json['PassingYards'] as double?,
+      airYards: json['AirYards'] as double?,
+      yardsAfterCatch: json['YardsAfterCatch'] as double?,
+      firstDownPass: json['FirstDownPass'] == "1",
+      passingTouchdown: json['PassingTouchdown'] == "1",
+      receivingYards: json['ReceivingYards'] as double?,
+      interception: json['Interception'] == "1",
+      fumble: json['Fumble'] == "1",
+      sack: json['Sack'] == "1",
+      rushAttempt: json['RushAttempt'] == "1",
+      rushingYards: json['RushingYards'] as double?,
+      rushingTouchdown: json['RushingTouchdown'] == "1",
+      firstDownRush: json['FirstDownRush'] == "1",
+      fieldGoalAttempt: json['FieldGoalAttempt'] == "1",
+      extraPointAttempt: json['ExtraPointAttempt'] == "1",
+      puntAttempt: json['PuntAttempt'] == "1",
+      kickoffAttempt: json['KickoffAttempt'] == "1",
+      fieldGoalResult: json['FieldGoalResult'] == "1",
+      extraPointResult: json['ExtraPointResult'] == "1",
+      safety: json['Safety'] == "1",
+      penalty: json['Penalty'] == "1",
+      week: json['Week'] as int?,
+      passerPlayerId: json['PasserPlayerID'] as String?,
+      receiverPlayerId: json['ReceiverPlayerID'] as String?,
+      rusherPlayerId: json['RusherPlayerID'] as String?,
+      kickerPlayerId: json['KickerPlayerID'] as String?,
+    );
+  }
+
 }

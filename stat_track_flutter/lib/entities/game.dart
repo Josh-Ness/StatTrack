@@ -66,4 +66,42 @@ class Game {
     this.underOdds,
     this.overOdds,
   });
+
+  factory Game.fromJson(Map<String, dynamic> json) {
+    return Game(
+      gameId: json['GameID'] as String,
+      season: json['Season'] as int,
+      week: json['Week'] as int,
+      gameType: json['GameType'] as String,
+      gameDay: json['GameDay'] != null ? DateTime.parse(json['GameDay'] as String) : null,
+      weekDay: json['WeekDay'] as String?,
+      gameTime: json['GameTime'] as String?,
+      location: json['Location'] as String?,
+      awayTeam: json['AwayTeam'] as String,
+      homeTeam: json['HomeTeam'] as String,
+      divGame: json['DivGame'] == "1", //Loads in as a string, convert to bool
+      awayScore: json['AwayScore'] as int?,
+      homeScore: json['HomeScore'] as int?,
+      total: json['Total'] as int?,
+      overtime: json['Overtime'] == "1",
+      result: json['Result'] as int?,
+      awayRest: json['AwayRest'] as int?,
+      homeRest: json['HomeRest'] as int?,
+      stadiumID: json['StadiumID'] as String?,
+      stadiumName: json['StadiumName'] as String?,
+      roof: json['Roof'] as String?,
+      surface: json['Surface'] as String?,
+      temp: json['Temp'] as int?,
+      wind: json['Wind'] as int?,
+      awayMoneyline: json['AwayMoneyline'] as int?,
+      homeMoneyline: json['HomeMoneyline'] as int?,
+      spreadLine: json['SpreadLine'] as double?,
+      homeSpreadOdds: json['HomeSpreadOdds'] as int?,
+      awaySpreadOdds: json['AwaySpreadOdds'] as int?,
+      totalLine: json['TotalLine'] as double?,
+      underOdds: json['UnderOdds'] as int?,
+      overOdds: json['OverOdds'] as int?,
+    );
+  }
+
 }
