@@ -60,9 +60,9 @@ class Player {
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
       playerId: json['PlayerID'] as String,
-      firstName: json['FirstName'] as String,
-      lastName: json['LastName'] as String,
-      fullName: json['FullName'] as String,
+      firstName: json['PlayerFirstName'] as String,
+      lastName: json['PlayerLastName'] as String,
+      fullName: json['PlayerFullName'] as String,
       jerseyNumber: json['JerseyNumber'] as int?,
       status: json['Status'] as String?,
       team: json['Team'] as String?,
