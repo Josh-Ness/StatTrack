@@ -133,6 +133,7 @@ END PRE LOADED TEST APP
 
 import 'package:flutter/material.dart';
 import 'screens/test_mock_service_screen.dart'; // Import the test screen
+import 'screens/games_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -144,8 +145,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      home: TestMockDataServiceScreen(), // Set the test screen as the home screen
+      title: 'NFL Game Tracker',
+      theme: ThemeData(
+        // Define your app's visual theme
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: GamesScreen(), // or home: TestMockDataServiceScreen()
     );
   }
 }
+
