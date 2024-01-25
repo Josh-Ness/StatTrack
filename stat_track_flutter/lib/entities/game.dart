@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+
+
 class Game {
   final String gameId;
   final int season;
@@ -68,12 +71,27 @@ class Game {
   });
 
   factory Game.fromJson(Map<String, dynamic> json) {
+    // Parse gameDay and gameTime to create a DateTime object
+    DateTime? gameDateTime;
+    if (json['GameDay'] != null && json['GameTime'] != null) {
+      final datePart = DateTime.parse(json['GameDay'] as String);
+      final timePart = TimeOfDay.fromDateTime(DateTime.parse('2000-01-01 ' + json['GameTime']));
+      gameDateTime = DateTime(
+        datePart.year,
+        datePart.month,
+        datePart.day,
+        timePart.hour,
+        timePart.minute,
+      );
+    }
+
     return Game(
       gameId: json['GameID'] as String,
       season: json['Season'] as int,
       week: json['Week'] as int,
       gameType: json['GameType'] as String,
-      gameDay: json['GameDay'] != null ? DateTime.parse(json['GameDay'] as String) : null,
+      //gameDay: json['GameDay'] != null ? DateTime.parse(json['GameDay'] as String) : null,
+      gameDay: gameDateTime, //Combined date time
       weekDay: json['WeekDay'] as String?,
       gameTime: json['GameTime'] as String?,
       location: json['Location'] as String?,
