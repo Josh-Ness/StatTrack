@@ -132,7 +132,7 @@ END PRE LOADED TEST APP
     */
 
 import 'package:flutter/material.dart';
-import 'screens/test_mock_service_screen.dart'; // Import the test screen
+// Import the test screen
 import 'screens/games_screen.dart';
 
 void main() {
@@ -151,7 +151,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: GamesScreen(), // or home: TestMockDataServiceScreen()
+      home: const GamesScreen(), // or home: TestMockDataServiceScreen()
     );
   }
 }
