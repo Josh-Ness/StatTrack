@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Defines all data associated with past and upcoming games
 
 class Game {
   final String gameId;
@@ -75,7 +76,8 @@ class Game {
     DateTime? gameDateTime;
     if (json['GameDay'] != null && json['GameTime'] != null) {
       final datePart = DateTime.parse(json['GameDay'] as String);
-      final timePart = TimeOfDay.fromDateTime(DateTime.parse('2000-01-01 ' + json['GameTime']));
+      final timePart = TimeOfDay.fromDateTime(
+          DateTime.parse('2000-01-01 ' + json['GameTime']));
       gameDateTime = DateTime(
         datePart.year,
         datePart.month,
@@ -121,5 +123,4 @@ class Game {
       overOdds: json['OverOdds'] as int?,
     );
   }
-
 }
