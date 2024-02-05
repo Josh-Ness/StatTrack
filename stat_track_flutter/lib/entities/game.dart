@@ -71,6 +71,15 @@ class Game {
     this.overOdds,
   });
 
+  bool get isUpcoming {
+    if (gameDay != null) {
+      return gameDay!.isAfter(DateTime.now());
+    } else {
+      // If gameDay is null, we assume the game is not upcoming.
+      return false;
+    }
+  }
+
   factory Game.fromJson(Map<String, dynamic> json) {
     // Parse gameDay and gameTime to create a DateTime object
     DateTime? gameDateTime;
@@ -92,7 +101,6 @@ class Game {
       season: json['Season'] as int,
       week: json['Week'] as int,
       gameType: json['GameType'] as String,
-      //gameDay: json['GameDay'] != null ? DateTime.parse(json['GameDay'] as String) : null,
       gameDay: gameDateTime, //Combined date time
       weekDay: json['WeekDay'] as String?,
       gameTime: json['GameTime'] as String?,
