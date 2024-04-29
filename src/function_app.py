@@ -65,6 +65,7 @@ def NFLDataPyBlobTriggerFunction(myblob: func.InputStream):
 
     except Exception as e:
         logging.error(f"Error connecting to SQL Server: {e}")
+        raise
 
 
 # odds-api container
@@ -127,6 +128,7 @@ def OddsDataPyBlobTriggerFunction(myblob: func.InputStream):
 
     except Exception as e:
         logging.error(f"Error connecting to SQL Server: {e}")
+        raise
 
 
 
