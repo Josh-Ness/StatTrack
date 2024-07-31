@@ -6,6 +6,11 @@ import pandas as pd
 import io
 import requests
 
+
+logging.basicConfig(filename='nfl.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.getLogger('azure.core.pipeline.policies.http_logging_policy').setLevel(logging.WARNING) #This prevents noisy audit style logs. I only want any errors here
+logger = logging.getLogger('nfl-data-py')
+
 app = func.FunctionApp()
 # nfl-data-py container
 @app.blob_trigger(arg_name="myblob", path="nfl-data-py/{name}", connection="AzureWebJobsStorage") 
