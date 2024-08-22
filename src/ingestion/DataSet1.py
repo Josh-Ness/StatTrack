@@ -172,11 +172,11 @@ def upload_file(df, table_type, season, week=None):
         Used to organize the files in a hierarchy
     '''
     try:
-        connection_string = os.getenv('NFL_STORAGE')
+        connection_string = os.getenv('STATTRACK_STORAGE')
         if not connection_string:
-            logger.error('Application stopped: NFL_STORAGE environment variable is not set.')
-            sys.exit('Error: The NFL_STORAGE environment variable is not set.')
-        container_name = 'nfl-data-py'
+            logger.error('Application stopped: STATTRACK_STORAGE environment variable is not set.')
+            sys.exit('Error: STATTRACK_STORAGE environment variable is not set.')
+        container_name = 'nfl'
 
         table_mapping = {
         # 'player-stats': f'weekly-player-stats/{season}_player_stats.parquet',
@@ -203,22 +203,65 @@ def upload_file(df, table_type, season, week=None):
             blob_service_client = BlobServiceClient.from_connection_string(connection_string)
             blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
             
-            # Upload the byte data of the CSV file
+            # Upload the byte data of the file
             blob_client.upload_blob(buffer, blob_type='BlockBlob', overwrite=True)
         
     except AzureError as ae:
         logger.error(f'Azure specific error occurred: {str(ae)}')
     return
 
+def process_historical_data(years):
+    """
+    This function processes historical NFL data for the given list of years.
+    It loops through each year and processes each week until an error occurs (likely due to missing data).
+    
+    Parameters:
+    ----------
+    years : list
+        A list of years to process.
+    """
+    for year in years:
+        print(f'Year: {year}')
+        week = 1
+        while True:
+            print(f'Week: {week}')
+            try:
+                # Retrieve and upload play-by-play stats
+                pbp_data, pbp_week = retrieve_pbp_stats([year], week)
+                if pbp_data.empty:
+                    break
+                upload_file(pbp_data, 'pbp-stats', year, pbp_week)
+                
+                # Retrieve and upload player injuries
+                injuries, injury_week = retrieve_player_injuries([year], week)
+                upload_file(injuries, 'player-injuries', year, injury_week)
+                
+                # Retrieve and upload rosters
+                rosters, roster_week = retrieve_rosters([year], week)
+                upload_file(rosters, 'rosters', year, roster_week)
+                
+                logger.info(f'Successfully processed data for Year: {year}, Week: {week}')
+                
+                # Increment to the next week
+                week += 1
+            
+            except Exception as e:
+            #     # Break out of the loop if an error occurs, likely due to missing data
+            #     logger.warning(f'Stopping processing for Year: {year} at Week: {week} due to error: {str(e)}')
+                break
+        
+    logger.info('Historical data processing completed.')
+    return
+
+
 def main():
-    # current_season = get_season()
-    current_season = 2023
-    pbp_data, pbp_week = retrieve_pbp_stats([current_season], 21)
+    current_season = get_season()
+    pbp_data, pbp_week = retrieve_pbp_stats([current_season])
     upload_file(pbp_data, 'pbp-stats', current_season, pbp_week)
-    injuries, injury_week = retrieve_player_injuries([current_season], 21)
+    injuries, injury_week = retrieve_player_injuries([current_season])
     upload_file(injuries, 'player-injuries', current_season, injury_week)
     upload_file(retrieve_schedule([current_season]), 'schedules', current_season)
-    rosters, roster_week = retrieve_rosters([current_season], 21)
+    rosters, roster_week = retrieve_rosters([current_season])
     upload_file(rosters, 'rosters', current_season, roster_week)
     logger.info('All nfl-data-py data ingested and uploaded successfully')
     return
