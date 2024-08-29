@@ -255,13 +255,14 @@ def process_historical_data(years):
 
 
 def main():
-    current_season = get_season()
-    pbp_data, pbp_week = retrieve_pbp_stats([current_season])
+    #current_season = get_season()
+    current_season = 2023
+    pbp_data, pbp_week = retrieve_pbp_stats([current_season], 22)
     upload_file(pbp_data, 'pbp-stats', current_season, pbp_week)
-    injuries, injury_week = retrieve_player_injuries([current_season])
+    injuries, injury_week = retrieve_player_injuries([current_season], 22)
     upload_file(injuries, 'player-injuries', current_season, injury_week)
     upload_file(retrieve_schedule([current_season]), 'schedules', current_season)
-    rosters, roster_week = retrieve_rosters([current_season])
+    rosters, roster_week = retrieve_rosters([current_season], 22)
     upload_file(rosters, 'rosters', current_season, roster_week)
     logger.info('All nfl-data-py data ingested and uploaded successfully')
     return

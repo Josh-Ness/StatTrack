@@ -6,14 +6,13 @@ import pandas as pd
 import io
 import requests
 
-
 logging.basicConfig(filename='nfl.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 logging.getLogger('azure.core.pipeline.policies.http_logging_policy').setLevel(logging.WARNING) #This prevents noisy audit style logs. I only want any errors here
 logger = logging.getLogger('nfl-data-py')
 
 app = func.FunctionApp()
 # nfl-data-py container
-@app.blob_trigger(arg_name="myblob", path="nfl-data-py/{name}", connection="AzureWebJobsStorage") 
+@app.blob_trigger(arg_name="myblob", path="nfl/{name}", connection="AzureWebJobsStorage") 
 def NFLDataPyBlobTriggerFunction(myblob: func.InputStream):
     logging.info(f"Python blob trigger function processed blob")
     logging.info(f"Name: {myblob.name}")
@@ -22,7 +21,7 @@ def NFLDataPyBlobTriggerFunction(myblob: func.InputStream):
     sas_token = os.environ["NFL_DATA"]
 
     # Construct the Blob URL with SAS Token
-    storage_account_name = "nfl1"  
+    storage_account_name = "stattrack"  
     blob_url = f"https://{storage_account_name}.blob.core.windows.net/{myblob.name}?{sas_token}"
 
     # Extract folder name from blob path and map it to SQL table names
