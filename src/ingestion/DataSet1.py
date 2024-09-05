@@ -72,7 +72,8 @@ def retrieve_pbp_stats(season_list, week=-1):
             week = str(week)
         
     except Exception as e:
-        logger.error(f'Error retrieving player stats: {str(e)}')        
+        logger.error(f'Error retrieving player stats: {str(e)}') 
+        return pd.DataFrame(), str(week)
     return df, str(week)
 
 def retrieve_player_injuries(season_list, week=-1):
@@ -96,6 +97,7 @@ def retrieve_player_injuries(season_list, week=-1):
         df = df.loc[df['Week'] == week]
     except Exception as e:
         logger.error(f'Error retrieving player injuries: {str(e)}')
+        return pd.DataFrame(), str(week)
     #Return week as a formatted string
     if week<10:
         week = '0'+str(week)
@@ -103,7 +105,7 @@ def retrieve_player_injuries(season_list, week=-1):
         week = str(week)
     return df, str(week)
 
-def retrieve_schedule(season_list):
+def retrieve_schedule(season_list): #dbo.game
     '''
     Given a list of season years, it will return the schedule (DataFrame format) for the entire season. If the game has already happened,
     it includes results of the game. Game odds also available if wanted.
@@ -125,9 +127,10 @@ def retrieve_schedule(season_list):
         df['GameTime'] = df['GameTime'].apply(lambda x: datetime.strptime(x, '%H:%M').time())
     except Exception as e:
         logger.error(f'Error retrieving schedule: {str(e)}')
+        return pd.DataFrame()
     return df
 
-def retrieve_rosters(season_list, week=-1):
+def retrieve_rosters(season_list, week=-1): #dbo.player
     '''
     Returns the roster for the specified seasons. If the season is current, it gives the most up to data to reflect any roster changes
     '''
@@ -150,6 +153,7 @@ def retrieve_rosters(season_list, week=-1):
         df = df.loc[df['Week'] == week]
     except Exception as e:
         logger.error(f'Error retrieving player stats: {str(e)}')
+        return pd.DataFrame(), str(week)
     #Return week as a formatted string
     if week<10:
         week = '0'+str(week)
@@ -255,15 +259,27 @@ def process_historical_data(years):
 
 
 def main():
-    #current_season = get_season()
-    current_season = 2023
-    pbp_data, pbp_week = retrieve_pbp_stats([current_season], 22)
-    upload_file(pbp_data, 'pbp-stats', current_season, pbp_week)
-    injuries, injury_week = retrieve_player_injuries([current_season], 22)
-    upload_file(injuries, 'player-injuries', current_season, injury_week)
-    upload_file(retrieve_schedule([current_season]), 'schedules', current_season)
-    rosters, roster_week = retrieve_rosters([current_season], 22)
-    upload_file(rosters, 'rosters', current_season, roster_week)
+    current_season = get_season()
+    pbp_data, pbp_week = retrieve_pbp_stats([current_season])
+    if not (pbp_data.empty):
+        upload_file(pbp_data, 'pbp-stats', current_season, pbp_week)
+    else:
+        print("No pbp data to upload")
+    injuries, injury_week = retrieve_player_injuries([current_season])
+    if not (injuries.empty):
+        upload_file(injuries, 'player-injuries', current_season, injury_week)
+    else:
+        print("No injury data to upload")
+    schedule = retrieve_schedule([current_season])
+    if not (schedule.empty):
+        upload_file(schedule, 'schedules', current_season)
+    else:
+        print("No schedule data to upload")
+    rosters, roster_week = retrieve_rosters([current_season])
+    if not (rosters.empty):
+        upload_file(rosters, 'rosters', current_season, roster_week)
+    else:
+        print("No new roster data to upload")
     logger.info('All nfl-data-py data ingested and uploaded successfully')
     return
 
