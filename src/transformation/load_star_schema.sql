@@ -116,7 +116,7 @@ BEGIN TRY
 
     INSERT INTO ss.Fact_PlayByPlay(GameID, PlayID, QTR, Drive, Down, Shotgun, NoHuddle, QbDropback, QbScramble, CompletePass, IncompletePass, PassingYards, AirYards, YardsAfterCatch, FirstDownPass,
     PassingTouchdown, ReceivingYards, Interception, Fumble, Sack, RushAttempt, RushingYards, RushingTouchdown, FirstDownRush, FieldGoalAttempt, ExtraPointAttempt, PuntAttempt, KickoffAttempt,
-    FieldGoalResult, ExtraPointResult, Safety, Penalty, Week, PasserPlayerID, ReceiverPlayerID, RusherPlayerID, KickerPlayerID)
+    FieldGoalResult, ExtraPointResult, Safety, Penalty, Season, Week, PasserPlayerID, ReceiverPlayerID, RusherPlayerID, KickerPlayerID)
     SELECT DISTINCT GameID, PlayID, QTR, Drive, Down, Shotgun, NoHuddle, QbDropback, QbScramble, CompletePass, IncompletePass, PassingYards, AirYards, YardsAfterCatch, FirstDownPass,
     PassingTouchdown, ReceivingYards, Interception, Fumble, Sack, RushAttempt, RushingYards, RushingTouchdown, FirstDownRush, FieldGoalAttempt, ExtraPointAttempt, PuntAttempt, KickoffAttempt,
     -- Transformation for FieldGoalResult
@@ -131,7 +131,7 @@ BEGIN TRY
         WHEN ExtraPointResult IS NOT NULL THEN 0
         ELSE NULL
     END AS ExtraPointResult,
-    Safety, Penalty, Week, PasserPlayerID, ReceiverPlayerID, RusherPlayerID, KickerPlayerID
+    Safety, Penalty, Season, Week, PasserPlayerID, ReceiverPlayerID, RusherPlayerID, KickerPlayerID
     FROM dbo.PlayByPlay
     WHERE NOT EXISTS (
         SELECT 1

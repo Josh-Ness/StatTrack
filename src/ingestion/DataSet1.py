@@ -43,19 +43,21 @@ def retrieve_pbp_stats(season_list, week=-1):
     '''
     week = int(week)
     try:
-        full_pbp = nfl.import_pbp_data(season_list)
+        #full_pbp = nfl.import_pbp_data(season_list)
+        '''TEMPORARY PARAMETER INCLUDE_PARTICIPATION=FALSE UNTIL PATCH'''
+        full_pbp = nfl.import_pbp_data(season_list, include_participation=False)
         if week == -1:
             week = full_pbp['week'].max()
         pbp = full_pbp.loc[full_pbp['week'] == week]
         fact_cols = ['game_id', 'play_id', 'qtr', 'drive', 'down', 'shotgun', 'no_huddle', 'qb_dropback', 'qb_scramble', 'complete_pass', 'incomplete_pass', 'passing_yards', 'air_yards', 'yards_after_catch', 'first_down_pass',
                      'pass_touchdown', 'receiving_yards', 'interception', 'fumble', 'sack', 'rush_attempt', 'rushing_yards', 'rush_touchdown', 'first_down_rush', 'field_goal_attempt', 'extra_point_attempt',
-                     'punt_attempt', 'kickoff_attempt', 'field_goal_result', 'extra_point_result', 'safety', 'penalty', 'week', 'passer_player_id', 'receiver_player_id', 'rusher_player_id', 'kicker_player_id']                                  
+                     'punt_attempt', 'kickoff_attempt', 'field_goal_result', 'extra_point_result', 'safety', 'penalty', 'season', 'week', 'passer_player_id', 'receiver_player_id', 'rusher_player_id', 'kicker_player_id']                                  
         df = pbp[fact_cols].copy()
         new_column_names = ['GameID', 'PlayID', 'QTR', 'Drive', 'Down', 'Shotgun', 'NoHuddle', 'QbDropback', 'QbScramble', 'CompletePass', 
                     'IncompletePass', 'PassingYards', 'AirYards', 'YardsAfterCatch', 'FirstDownPass', 'PassingTouchdown', 
                     'ReceivingYards', 'Interception', 'Fumble', 'Sack', 'RushAttempt', 'RushingYards', 'RushingTouchdown', 
                     'FirstDownRush', 'FieldGoalAttempt', 'ExtraPointAttempt', 'PuntAttempt', 'KickoffAttempt', 
-                    'FieldGoalResult', 'ExtraPointResult', 'Safety', 'Penalty', 'Week', 'PasserPlayerID', 
+                    'FieldGoalResult', 'ExtraPointResult', 'Safety', 'Penalty', 'Season', 'Week', 'PasserPlayerID', 
                     'ReceiverPlayerID', 'RusherPlayerID', 'KickerPlayerID']
 
         # Renaming the columns
@@ -260,12 +262,15 @@ def process_historical_data(years):
 
 def main():
     current_season = get_season()
+    print(f'Season {current_season}')
     pbp_data, pbp_week = retrieve_pbp_stats([current_season])
+    print(f'pbp week: {pbp_week}')
     if not (pbp_data.empty):
         upload_file(pbp_data, 'pbp-stats', current_season, pbp_week)
     else:
         print("No pbp data to upload")
     injuries, injury_week = retrieve_player_injuries([current_season])
+    print(f'injury week: {injury_week}')
     if not (injuries.empty):
         upload_file(injuries, 'player-injuries', current_season, injury_week)
     else:
@@ -276,6 +281,7 @@ def main():
     else:
         print("No schedule data to upload")
     rosters, roster_week = retrieve_rosters([current_season])
+    print(f'roster week: {roster_week}')
     if not (rosters.empty):
         upload_file(rosters, 'rosters', current_season, roster_week)
     else:

@@ -152,10 +152,13 @@ CREATE TABLE PlayByPlay (
     FirstDownRush BIT,
     FieldGoalAttempt BIT,
     ExtraPointAttempt BIT,
+    PuntAttempt BIT,
+    KickoffAttempt BIT,
     FieldGoalResult NVARCHAR(10),
     ExtraPointRusult NVARCHAR(10),
     Safety BIT,
     Penalty BIT,
+    Season INT,
     Week INT,
     -- Foreign Keys
     PasserPlayerID NVARCHAR(20),
@@ -164,10 +167,10 @@ CREATE TABLE PlayByPlay (
     KickerPlayerID NVARCHAR(20),
     StadiumID NVARCHAR(10),
     -- FK Constraints
-    CONSTRAINT FK_PlayByPlay_PasserPlayerID FOREIGN KEY (PasserPlayerID) REFERENCES dbo.Player(PlayerID),
-    CONSTRAINT FK_PlayByPlay_ReceiverPlayerID FOREIGN KEY (ReceiverPlayerID) REFERENCES dbo.Player(PlayerID),
-    CONSTRAINT FK_PlayByPlay_RusherPlayerID FOREIGN KEY (RusherPlayerID) REFERENCES dbo.Player(PlayerID),
-    CONSTRAINT FK_PlayByPlay_KickerPlayerID FOREIGN KEY (KickerPlayerID) REFERENCES dbo.Player(PlayerID),
-    CONSTRAINT FK_PlayByPlay_StadiumID FOREIGN KEY (StadiumID) REFERENCES dbo.Stadium(StadiumID)
+    --CONSTRAINT FK_PlayByPlay_PasserPlayerID FOREIGN KEY (PasserPlayerID) REFERENCES dbo.Player(PlayerID),
+   -- CONSTRAINT FK_PlayByPlay_ReceiverPlayerID FOREIGN KEY (ReceiverPlayerID) REFERENCES dbo.Player(PlayerID),
+  --  CONSTRAINT FK_PlayByPlay_RusherPlayerID FOREIGN KEY (RusherPlayerID) REFERENCES dbo.Player(PlayerID),
+    --CONSTRAINT FK_PlayByPlay_KickerPlayerID FOREIGN KEY (KickerPlayerID) REFERENCES dbo.Player(PlayerID),
+  --  CONSTRAINT FK_PlayByPlay_StadiumID FOREIGN KEY (StadiumID) REFERENCES dbo.Stadium(StadiumID)
 );
 GO
