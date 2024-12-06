@@ -49,8 +49,8 @@ def NFLDataPyBlobTriggerFunction(myblob: func.InputStream):
 
         # Read the blob into a DataFrame
         response = requests.get(blob_url)
-        blob_data = io.BytesIO(response.content)  # Adjust this based on your blob's data format
-        df = pd.read_parquet(blob_data)  # Or pd.read_parquet for Parquet files
+        blob_data = io.BytesIO(response.content) 
+        df = pd.read_parquet(blob_data) 
         df = df.astype(object).where(df.notna(), None)
 
         # Use fast_executemany for efficient bulk insert
