@@ -10,7 +10,7 @@ TABLE_MAPPINGS = {
 
 def process_and_upload_data():
     current_season = get_season()
-
+    current_season = 2024
     pbp_data, pbp_week = retrieve_pbp_stats([current_season])
     if not pbp_data.empty:
         table_name = TABLE_MAPPINGS['pbp-stats']
