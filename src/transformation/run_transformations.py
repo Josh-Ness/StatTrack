@@ -19,7 +19,7 @@ def run_sql_script(file_path):
             sql = f.read()
         cur.execute(sql)
         conn.commit()
-        print("✅ Star schema transformation and cleanup complete.")
+        print("Star schema transformation and cleanup complete.")
 
 run_sql_script("load_star_schema.sql")  # Adjust path if needed
 conn.close()

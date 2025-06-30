@@ -16,4 +16,4 @@ with psycopg2.connect(
             cur.execute(f.read())
         conn.commit()
 
-print("✅ Staging schema created in PostgreSQL.")
+print("Staging schema created in PostgreSQL.")

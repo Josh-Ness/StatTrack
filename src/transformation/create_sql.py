@@ -31,15 +31,15 @@ def execute_sql_file(filename):
             statement = statement.strip()
             if statement:
                 cur.execute(statement)
-        print(f"✅ Executed: {filename}")
+        print(f"Executed: {filename}")
 
 try:
     execute_sql_file("src/transformation/staging_schema.sql")
     execute_sql_file("src/transformation/star_schema.sql")
     conn.commit()
-    print("✅ All schema files executed successfully.")
+    print("All schema files executed successfully.")
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f"Error: {e}")
     conn.rollback()
 finally:
     conn.close()
