@@ -1,0 +1,32 @@
+# delete_dbo_data.py
+
+import psycopg2
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Loads your .env file
+
+conn = psycopg2.connect(
+    dbname=os.getenv("DB_NAME"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    host=os.getenv("DB_HOST"),
+    port=os.getenv("DB_PORT")
+)
+
+cur = conn.cursor()
+
+tables = [
+    "dbo_player", "dbo_game", "dbo_injury",
+    "dbo_stadium", "dbo_playerprops", "dbo_playbyplay"
+]
+
+# Use TRUNCATE for a full reset
+query = f"TRUNCATE TABLE {', '.join(tables)} RESTART IDENTITY CASCADE;"
+cur.execute(query)
+
+conn.commit()
+cur.close()
+conn.close()
+
+print("✅ Tables truncated!")

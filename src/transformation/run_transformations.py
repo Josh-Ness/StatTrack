@@ -21,5 +21,5 @@ def run_sql_script(file_path):
         conn.commit()
         print("Star schema transformation and cleanup complete.")
 
-run_sql_script("load_star_schema.sql")  # Adjust path if needed
+run_sql_script("load_star.sql")  # Adjust path if needed
 conn.close()

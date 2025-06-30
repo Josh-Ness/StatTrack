@@ -34,5 +34,5 @@ def upload_to_sql(df, table_name):
         logger.info(f"✅ Uploaded to {table_name}")
 
     except Exception as e:
-        logger.error(f"❌ Error uploading to {table_name}: {e}")
+        logger.error(f"Error uploading to {table_name}: {e}")
         raise

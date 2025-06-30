@@ -155,6 +155,8 @@ def process_historical_data(years):
     years : list
         A list of years to process.
     """
+
+    from db_insertion import upload_to_sql
     for year in years:
         print(f'Year: {year}')
         week = 1
@@ -165,15 +167,23 @@ def process_historical_data(years):
                 pbp_data, pbp_week = retrieve_pbp_stats([year], week)
                 if pbp_data.empty:
                     break
-                upload_file(pbp_data, 'pbp-stats', year, pbp_week)
+                pbp_data = clean_dataframe(pbp_data)
+                upload_to_sql(pbp_data, 'dbo_PlayByPlay')
                 
                 # Retrieve and upload player injuries
                 injuries, injury_week = retrieve_player_injuries([year], week)
-                upload_file(injuries, 'player-injuries', year, injury_week)
-                
+                injuries = clean_dataframe(injuries)
+                upload_to_sql(injuries, 'dbo_Injury')
+                """
+                # Retrieve and upload schedule
+                schedule, roster_week = retrieve_schedule([year], week)
+                schedule = clean_dataframe(schedule)
+                upload_to_sql(schedule, 'dbo_Game')
+                """
                 # Retrieve and upload rosters
                 rosters, roster_week = retrieve_rosters([year], week)
-                upload_file(rosters, 'rosters', year, roster_week)
+                rosters = clean_dataframe(rosters)
+                upload_to_sql(rosters, 'dbo_Player')
                 
                 logger.info(f'Successfully processed data for Year: {year}, Week: {week}')
                 
@@ -187,17 +197,26 @@ def process_historical_data(years):
         
     logger.info('Historical data processing completed.')
     return
+    
 '''
 
 def clean_dataframe(df):
+    #TODO FIX ISSUE WHERE week 0 or 1 is turned into a boolean
+
+    skips = {"Week"}
+
     # Convert NaNs to None (nulls for SQL)
     df = df.astype(object).where(df.notna(), None)
 
     # Infer and coerce booleans (0/1 or 0.0/1.0) to actual bools
     for col in df.columns:
+        if col in skips:
+            continue
         if df[col].dropna().nunique() <= 2:
             unique_vals = set(df[col].dropna().unique())
             if unique_vals.issubset({0, 1, 0.0, 1.0, True, False}):
                 df[col] = df[col].apply(lambda x: bool(x) if x is not None else None)
 
     return df
+
+#process_historical_data([2021, 2022, 2023, 2024])
