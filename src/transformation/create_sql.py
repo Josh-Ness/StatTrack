@@ -34,8 +34,8 @@ def execute_sql_file(filename):
         print(f"✅ Executed: {filename}")
 
 try:
-    execute_sql_file("src/transformation/staging_schema_postgres.sql")
-    execute_sql_file("src/transformation/star_schema_postgres.sql")
+    execute_sql_file("src/transformation/staging_schema.sql")
+    execute_sql_file("src/transformation/star_schema.sql")
     conn.commit()
     print("✅ All schema files executed successfully.")
 except Exception as e:
