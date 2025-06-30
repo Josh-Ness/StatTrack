@@ -2,10 +2,10 @@ from data_collection import get_season, retrieve_pbp_stats, retrieve_player_inju
 from db_insertion import upload_to_sql
 
 TABLE_MAPPINGS = {
-    'rosters': 'dbo.Player',
-    'schedules': 'dbo.Game',
-    'injuries': 'dbo.Injury',
-    'pbp-stats': 'dbo.PlayByPlay'
+    'rosters': 'dbo_Player',
+    'schedules': 'dbo_Game',
+    'injuries': 'dbo_Injury',
+    'pbp-stats': 'dbo_PlayByPlay'
 }
 
 def process_and_upload_data():

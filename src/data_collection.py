@@ -91,11 +91,11 @@ def retrieve_schedule(season_list): #dbo.game
         df = nfl.import_schedules(season_list)
        
         df = df[['game_id', 'season', 'week', 'game_type', 'gameday', 'weekday', 'gametime', 'location', 'away_team', 'home_team', 'div_game', 'away_score', 'home_score',
-                 'total', 'overtime', 'result', 'away_rest', 'home_rest', 'stadium_id', 'stadium', 'roof', 'surface', 'temp', 'wind', 'away_moneyline', 'home_moneyline', 'spread_line',
+                 'total', 'overtime', 'result', 'away_rest', 'home_rest', 'stadium_id', 'temp', 'wind', 'away_moneyline', 'home_moneyline', 'spread_line',
                  'home_spread_odds', 'away_spread_odds', 'total_line', 'under_odds', 'over_odds']].copy()
         new_column_names = ['GameID', 'Season', 'Week', 'GameType', 'GameDay', 'WeekDay', 'GameTime', 'Location', 'AwayTeam', 
                     'HomeTeam', 'DivGame', 'AwayScore', 'HomeScore', 'Total', 'Overtime', 'Result', 'AwayRest', 'HomeRest', 
-                    'StadiumID', 'StadiumName', 'Roof', 'Surface', 'Temp', 'Wind', 'AwayMoneyline', 'HomeMoneyLine', 
+                    'StadiumID', 'Temp', 'Wind', 'AwayMoneyline', 'HomeMoneyLine', 
                     'SpreadLine', 'HomeSpreadOdds', 'AwaySpreadOdds', 'TotalLine', 'UnderOdds', 'OverOdds']
 
         # Renaming the columns
@@ -190,4 +190,14 @@ def process_historical_data(years):
 '''
 
 def clean_dataframe(df):
-    return df.astype(object).where(df.notna(), None)
+    # Convert NaNs to None (nulls for SQL)
+    df = df.astype(object).where(df.notna(), None)
+
+    # Infer and coerce booleans (0/1 or 0.0/1.0) to actual bools
+    for col in df.columns:
+        if df[col].dropna().nunique() <= 2:
+            unique_vals = set(df[col].dropna().unique())
+            if unique_vals.issubset({0, 1, 0.0, 1.0, True, False}):
+                df[col] = df[col].apply(lambda x: bool(x) if x is not None else None)
+
+    return df
